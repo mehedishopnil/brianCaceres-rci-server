@@ -87,21 +87,36 @@ async function run() {
 
 
 
-     // Posting Users data to MongoDB database
+ // Posting Users data to MongoDB database
 app.post("/users", async (req, res) => {
   try {
     const { name, email } = req.body;
+
     if (!name || !email) {
       return res.status(400).send("Name and email are required");
     }
+
+    // Check if user with the same email already exists
+    const existingUser = await usersCollection.findOne({ email });
+    if (existingUser) {
+      return res.status(409).send("User with this email already exists");
+    }
+
     console.log(req.body); // Logs posted user data for debugging (optional)
     const result = await usersCollection.insertOne(req.body);
-    res.send(result);
+
+    res.status(201).send({
+      message: "User successfully added",
+      userId: result.insertedId,
+    });
   } catch (error) {
-    console.error("Error adding user data:", error);
+    console.error("Error adding user data:", error.message);
     res.status(500).send("Internal Server Error");
   }
 });
+
+
+
 
 // GET endpoint to fetch user data by email
 app.get('/users', async (req, res) => {
