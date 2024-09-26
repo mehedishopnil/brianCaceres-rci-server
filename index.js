@@ -134,6 +134,7 @@ app.get('/users', async (req, res) => {
   }
 });
 
+
 // Get all user data without pagination
 app.get('/all-users', async (req, res) => {
   try {
