@@ -163,7 +163,7 @@ async function run() {
         const skip = (page - 1) * limit;
 
         // Limit the total number of resorts sent to 70
-        const totalLimit = 70;
+        const totalLimit = 150;
 
         // Find the resorts with a hard limit of 70 resorts
         const resorts = await allResortDataCollection
