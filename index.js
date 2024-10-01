@@ -34,66 +34,6 @@ async function run() {
     const allBookingsCollection = db.collection("allBookings");
     const paymentInfoCollection = db.collection("paymentInfo");
 
-    // Get paginated and filtered resorts data from MongoDB Database
-    app.get("/resorts", async (req, res) => {
-      try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 15;
-        const skip = (page - 1) * limit;
-
-        // Limit the total number of resorts sent to 70
-        const totalLimit = 70;
-
-        // Find the resorts with a hard limit of 70 resorts
-        const resorts = await allResortDataCollection
-          .find()
-          .limit(totalLimit)
-          .skip(skip)
-          .limit(limit)
-          .toArray();
-
-        // Use the smaller value between the total resorts and the 70 limit
-        const count = Math.min(
-          await allResortDataCollection.countDocuments(),
-          totalLimit
-        );
-
-        res.send({
-          resorts,
-          totalPages: Math.ceil(count / limit),
-          currentPage: page,
-          totalResorts: count, // Include the total count of resorts (max 70)
-        });
-      } catch (error) {
-        console.error("Error fetching resort data:", error);
-        res.status(500).send("Internal Server Error");
-      }
-    });
-
-    // Get all resort data without pagination
-    app.get("/all-resorts", async (req, res) => {
-      try {
-        const resorts = await allResortDataCollection.find().toArray();
-        res.send(resorts);
-      } catch (error) {
-        console.error("Error fetching all resort data:", error);
-        res.status(500).send("Internal Server Error");
-      }
-    });
-
-    // Posting resort data to MongoDB database
-    app.post("/resorts", async (req, res) => {
-      try {
-        const resort = req.body;
-        console.log(resort); // Logs posted resort data for debugging (optional)
-        const result = await allResortDataCollection.insertOne(resort);
-        res.send(result);
-      } catch (error) {
-        console.error("Error adding resort data:", error);
-        res.status(500).send("Internal Server Error");
-      }
-    });
-
     // Posting Users data to MongoDB database
     app.post("/users", async (req, res) => {
       try {
@@ -197,12 +137,10 @@ async function run() {
         );
 
         if (result.modifiedCount === 0) {
-          return res
-            .status(404)
-            .json({
-              success: false,
-              message: "User not found or information not updated.",
-            });
+          return res.status(404).json({
+            success: false,
+            message: "User not found or information not updated.",
+          });
         }
 
         res.json({
@@ -214,6 +152,110 @@ async function run() {
         res
           .status(500)
           .json({ success: false, message: "Internal Server Error" });
+      }
+    });
+
+    // Get paginated and filtered resorts data from MongoDB Database
+    app.get("/resorts", async (req, res) => {
+      try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 15;
+        const skip = (page - 1) * limit;
+
+        // Limit the total number of resorts sent to 70
+        const totalLimit = 70;
+
+        // Find the resorts with a hard limit of 70 resorts
+        const resorts = await allResortDataCollection
+          .find()
+          .limit(totalLimit)
+          .skip(skip)
+          .limit(limit)
+          .toArray();
+
+        // Use the smaller value between the total resorts and the 70 limit
+        const count = Math.min(
+          await allResortDataCollection.countDocuments(),
+          totalLimit
+        );
+
+        res.send({
+          resorts,
+          totalPages: Math.ceil(count / limit),
+          currentPage: page,
+          totalResorts: count, // Include the total count of resorts (max 70)
+        });
+      } catch (error) {
+        console.error("Error fetching resort data:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
+    // Get all resort data without pagination
+    app.get("/all-resorts", async (req, res) => {
+      try {
+        const resorts = await allResortDataCollection.find().toArray();
+        res.send(resorts);
+      } catch (error) {
+        console.error("Error fetching all resort data:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
+    // Posting resort data to MongoDB database
+    app.post("/resorts", async (req, res) => {
+      try {
+        const resort = req.body;
+        console.log(resort); // Logs posted resort data for debugging (optional)
+        const result = await allResortDataCollection.insertOne(resort);
+        res.send(result);
+      } catch (error) {
+        console.error("Error adding resort data:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
+    //Bookings
+
+    // Posting Bookings data to MongoDB database
+    app.post("/bookings", async (req, res) => {
+      try {
+        const resort = req.body;
+        console.log(resort); // Logs posted resort data for debugging (optional)
+        const result = await allBookingsCollection.insertOne(resort);
+        res.send(result);
+      } catch (error) {
+        console.error("Error adding resort data:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
+    //Payment Info code will be here
+
+    // GET endpoint to fetch user data by email
+    app.get("/bookings", async (req, res) => {
+      const { email } = req.query;
+
+      try {
+        const user = await allBookingsCollection.findOne({ email: email });
+        if (!user) {
+          return res.status(404).json({ error: "User not found" });
+        }
+        res.json(user);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
+    // Get all booking data without pagination
+    app.get("/all-bookings", async (req, res) => {
+      try {
+        const bookings = await allBookingsCollection.find().toArray();
+        res.send(bookings);
+      } catch (error) {
+        console.error("Error fetching all booking data:", error);
+        res.status(500).send("Internal Server Error");
       }
     });
 
