@@ -157,39 +157,33 @@ async function run() {
 
     // Get paginated and filtered resorts data from MongoDB Database
     app.get("/resorts", async (req, res) => {
-      try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 15;
-        const skip = (page - 1) * limit;
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const skip = (page - 1) * limit;
 
-        // Limit the total number of resorts sent to 70
-        const totalLimit = 200;
+    // Find the resorts without any total limit
+    const resorts = await allResortDataCollection
+      .find()
+      .skip(skip)
+      .limit(limit)
+      .toArray();
 
-        // Find the resorts with a hard limit of 70 resorts
-        const resorts = await allResortDataCollection
-          .find()
-          .limit(totalLimit)
-          .skip(skip)
-          .limit(limit)
-          .toArray();
+    // Get the total count of resorts
+    const count = await allResortDataCollection.countDocuments();
 
-        // Use the smaller value between the total resorts and the 70 limit
-        const count = Math.min(
-          await allResortDataCollection.countDocuments(),
-          totalLimit
-        );
-
-        res.send({
-          resorts,
-          totalPages: Math.ceil(count / limit),
-          currentPage: page,
-          totalResorts: count, // Include the total count of resorts (max 70)
-        });
-      } catch (error) {
-        console.error("Error fetching resort data:", error);
-        res.status(500).send("Internal Server Error");
-      }
+    res.send({
+      resorts,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      totalResorts: count, // Include the total count of resorts
     });
+  } catch (error) {
+    console.error("Error fetching resort data:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 
     // Get all resort data without pagination
     app.get("/all-resorts", async (req, res) => {
