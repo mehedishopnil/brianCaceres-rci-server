@@ -155,30 +155,31 @@ async function run() {
       }
     });
 
+
     // Delete user by email here is the new update.
-    app.delete('/delete-users', async (req, res) => {
-      const { email } = req.body;
+app.delete('/delete-users', async (req, res) => {
+  const { email } = req.body;
 
-      try {
-        if (!email) {
-          return res.status(400).json({ error: 'Email is required' });
-        }
+  try {
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
 
-        const result = await usersCollection.deleteOne({ email: email });
+    const result = await usersCollection.deleteOne({ email: email });
 
-        if (result.deletedCount === 0) {
-          return res.status(404).json({ error: 'User not found' });
-        }
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-        res.json({
-          success: true,
-          message: 'User successfully deleted',
-        });
-      } catch (error) {
-        console.error('Error deleting user:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-      }
+    res.json({
+      success: true,
+      message: 'User successfully deleted',
     });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
     // Get paginated and filtered resorts data from MongoDB Database
     app.get('/resorts', async (req, res) => {
