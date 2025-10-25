@@ -288,7 +288,7 @@ app.delete('/delete-users', async (req, res) => {
 
     // Start the server after successful connection
     app.listen(port, () => {
-      console.log(`Airbnb server is running on Port ${port}`);
+      console.log(`RCI server is running on Port ${port}`);
     });
   } catch (error) {
     console.error("Error running the server:", error);
